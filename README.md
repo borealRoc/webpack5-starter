@@ -44,3 +44,7 @@ plugins: [
   ["@babel/plugin-proposal-private-property-in-object", { loose: true }],
 ];
 ```
+
+## 2. 处理 ts
+
+- 借助 'ts-loader' 或 '@babel/preset-typescript'

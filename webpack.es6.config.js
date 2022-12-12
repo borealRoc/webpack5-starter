@@ -26,7 +26,7 @@ module.exports = merge(baseConfig, {
                    * usage 会根据配置的浏览器兼容，以及你代码中用到的 API 来进行 polyfill，实现了按需添加
                    */
                   useBuiltIns: "entry",
-                  corejs: "3.9.1",
+                  corejs: "3.26.1",
                   targets: {
                     chrome: "58",
                     ie: "11",
