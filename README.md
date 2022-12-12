@@ -48,3 +48,12 @@ plugins: [
 ## 2. 处理 ts
 
 - 借助 'ts-loader' 或 '@babel/preset-typescript'
+
+## 3. vue 打包环境
+
+- vue-loader：用于 Vue 单文件组件的 webpack 加载器
+- vue-template-compiler：将 Vue 2.0 模板预编译为渲染函数（template => ast => render）
+
+## 4. react 打包环境
+
+- @babel/preset-react: JSX 被编译为 React.createElement 函数调用
