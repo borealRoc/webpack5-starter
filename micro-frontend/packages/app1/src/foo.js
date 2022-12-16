@@ -1,0 +1,1 @@
+export const sayHello = () => console.log(`Hello, I'm from App1.`);
