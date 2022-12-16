@@ -81,7 +81,7 @@ module.exports = {
 };
 ```
 
-```json
+```javascript
 // package.json
 {
   // 4.1 声明 npm 包名
