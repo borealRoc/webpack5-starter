@@ -60,6 +60,43 @@ plugins: [
 
 ## 5. NPM Library
 
+```javascript
+// webpack.config.js
+const nodeExternals = require("webpack-node-externals");
+module.exports = {
+  entry: "./src/index",
+  output: {
+    path: path.resolve(__dirname, "./dist"),
+    filename: "main.js",
+    // 1. 声明 webpack 的构建目标为 library
+    library: {
+      name: "npm-library-name",
+      type: "umd",
+    },
+  },
+  // 2. 引入第三方包时让 webpack 不要一起打包
+  externals: [nodeExternals()],
+  // 3. 生产 Sourcemap
+  devtool: "source-map",
+};
+```
+
+```json
+// package.json
+{
+  // 4.1 声明 npm 包名
+  "name": "npm-library-name",
+  // 4.2 指定 ES Module 模式引入时的入口文件
+  "module": "src/index.js",
+  // 4.3 指定 ES 其它 模式引入时的入口文件
+  "main": "dist/main.js",
+  "scripts": {
+    // 5. 在发布前自动执行编译命令
+    "prepublishOnly": "webpack --mode=production"
+  }
+}
+```
+
 ## 6. 微前端应用
 
 - webpack5 模块联邦（MF）
@@ -76,62 +113,62 @@ plugins: [
 
 - Webpack5 Module Federation + pnpm-workspace 实现微前端
 
-  1. pnpm-workspace
+  - pnpm-workspace
 
-  - 初始化
+    - 初始化
 
-  ```shell
-  mkdir micro-frontend
-  cd micro-frontend
-  pnpm init
-  ```
+    ```shell
+    mkdir micro-frontend
+    cd micro-frontend
+    pnpm init
+    ```
 
-  - 初始化工作空间：在根目录下创建 pnpm-workspace.yaml 文件
+    - 初始化工作空间：在根目录下创建 pnpm-workspace.yaml 文件
 
-  ```shell
-  packages:
-  - 'packages/**'
+    ```shell
+    packages:
+    - 'packages/**'
 
-  ```
+    ```
 
-  - 安装依赖
+    - 安装依赖
 
-  ```shell
-  pnpm i webpack -D -W  // 所有packages共享
-  pnpm i lodash -S -r --filter app1  // 只安装在 app1 下
-  pnpm i lodash -S // 只安装在 app1 下，也可以直接在 app1 目录下安装
+    ```shell
+    pnpm i webpack -D -W  // 所有packages共享
+    pnpm i lodash -S -r --filter app1  // 只安装在 app1 下
+    pnpm i lodash -S // 只安装在 app1 下，也可以直接在 app1 目录下安装
 
-  ```
+    ```
 
-  2. Webpack5 MF
+  - Webpack5 MF
 
-  - 模块导出
+    - 模块导出
 
-  ```javascript
-  // app1/webpack.config.js
-  const { ModuleFederationPlugin } = require("webpack").container;
-  module.exports = {
-    plugins: [
-      new ModuleFederationPlugin({
-        name: "app1", // app1 应用名称
-        fielname: "app1.js", // app1 模块入口
-        expose: {
-          // 定义app1导出哪些模块
-          "./utils": "./src/utils",
-          "./foo": "./src/foo",
-        },
-        // 依赖共享
-        shared: ['lodash']
-      }),
-    ],
-    // MF 应用资源提供方必须以 http(s) 形式提供服务
-    devServer: {
-      port: 8081,
-    },
-  };
-  ```
+    ```javascript
+    // app1/webpack.config.js
+    const { ModuleFederationPlugin } = require("webpack").container;
+    module.exports = {
+      plugins: [
+        new ModuleFederationPlugin({
+          name: "app1", // app1 应用名称
+          fielname: "app1.js", // app1 模块入口
+          expose: {
+            // 定义app1导出哪些模块
+            "./utils": "./src/utils",
+            "./foo": "./src/foo",
+          },
+          // 依赖共享
+          shared: ["lodash"],
+        }),
+      ],
+      // MF 应用资源提供方必须以 http(s) 形式提供服务
+      devServer: {
+        port: 8081,
+      },
+    };
+    ```
 
-  - 模块导入
+    - 模块导入
 
     ```javascript
     // app2/webpack.config.js
@@ -141,16 +178,16 @@ plugins: [
         new ModuleFederationPlugin({
           // 使用 remotes 属性引入远程模块列表
           remotes: {
-          // 地址需要指向导出方生成的应用入口文件
-          /**
-           * app1和上面的name对应
-           * http://localhost:8081和上面的devServer对应
-           * app1.js和上面的fielname对应
-          */
-            RemoteApp1: 'app1@http://localhost:8081/dist/app1.js',
+            // 地址需要指向导出方生成的应用入口文件
+            /**
+             * app1和上面的name对应
+             * http://localhost:8081和上面的devServer对应
+             * app1.js和上面的fielname对应
+             */
+            RemoteApp1: "app1@http://localhost:8081/dist/app1.js",
           },
           // 依赖共享
-          shared: ['lodash']
+          shared: ["lodash"],
         }),
       ],
     };
@@ -160,7 +197,7 @@ plugins: [
       /**
        * RemoteApp1和上面的remotes.RemoteApp1对应
        * utils和expose.utils对应
-      */
+       */
       const { sayHello } = await import("RemoteApp1/utils");
       sayHello();
     })();

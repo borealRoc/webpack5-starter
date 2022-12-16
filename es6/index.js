@@ -27,3 +27,7 @@ function log(text) {
 }
 const mc = new MyClass();
 mc.logger();
+
+// 测试自己发布的npm包
+import { syAdd } from "super-saiya-add";
+console.log("测试自己发布的npm包_syAdd(10, 20)", syAdd(10, 20));
