@@ -1,0 +1,31 @@
+.assets {
+  height: 150px;
+  overflow: hidden;
+  .dog {
+    float: left;
+    width: 128px;
+    height: 128px;
+    background: url("./dog.png") no-repeat 0 0;
+  }
+  .robot {
+    float: right;
+    width: 128px;
+    height: 128px;
+    background: url("./robot.png") no-repeat 0 0;
+  }
+}
+
+@import (less) "./assets/sprite.less";
+.sprite {
+  display: flex;
+  justify-content: space-around;
+  .grunt {
+    .sprite(@grunt);
+  }
+  .gulp {
+    .sprite(@gulp);
+  }
+  .webpack {
+    .sprite(@webpack);
+  }
+}

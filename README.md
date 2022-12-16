@@ -202,3 +202,15 @@ module.exports = {
       sayHello();
     })();
     ```
+
+## 7. 图片处理与优化
+
+- 处理：Asset Module 模型（指定 module.rules.type），无需 loader
+  - `type = "asset/resource"`: 发送一个单独的文件并导出 URL。之前通过使用  file-loader  实现
+  - `type = "asset/inline"`: 导出一个资源的 data URI。之前通过使用 url-loader 实现
+  - `type = "asset/source"`: 导出资源的源代码。之前通过使用 raw-loader 实现
+  - `type = "asset"`: 在导出一个 data URI 和发送一个单独的文件之间自动选择。之前通过使用 url-loader，并且配置资源体积限制实现
+- 优化
+  - 图片压缩: 借助 image-webpack-loader
+  - 雪碧图：借助  webpack-spritesmith
+  - 响应式图片：借助 responsive-loader

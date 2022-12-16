@@ -1,0 +1,89 @@
+/*!****************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/.pnpm/registry.npmmirror.com+css-loader@6.7.2_webpack@5.75.0/node_modules/css-loader/dist/cjs.js!./node_modules/.pnpm/registry.npmmirror.com+less-loader@11.1.0_less@4.1.3+webpack@5.75.0/node_modules/less-loader/dist/cjs.js!./asset/index.less ***!
+  \****************************************************************************************************************************************************************************************************************************************************************************/
+.assets {
+  height: 150px;
+  overflow: hidden;
+}
+.assets .dog {
+  float: left;
+  width: 128px;
+  height: 128px;
+  background: url(db898770169081f2695a.png) no-repeat 0 0;
+}
+.assets .robot {
+  float: right;
+  width: 128px;
+  height: 128px;
+  background: url(ebcd0204b734cd69556f.png) no-repeat 0 0;
+}
+/*
+LESS variables are information about icon's compiled state, stored under its original file name
+
+.icon-home {
+  width: @icon-home-width;
+}
+
+The large array-like variables contain all information about a single icon
+@icon-home: x y offset_x offset_y width height total_width total_height image_path name;
+
+At the bottom of this section, we provide information about the spritesheet itself
+@spritesheet: width height image @spritesheet-sprites;
+*/
+/*
+The provided classes are intended to be used with the array-like variables
+
+.icon-home {
+  .sprite-width(@icon-home);
+}
+.icon-email {
+  .sprite(@icon-email);
+}
+
+Example usage in HTML:
+
+`display: block` sprite:
+<div class="icon-home"></div>
+
+To change `display` (e.g. `display: inline-block;`), we suggest using a common CSS class:
+
+// CSS
+.icon {
+  display: inline-block;
+}
+
+// HTML
+<i class="icon icon-home"></i>
+*/
+/*
+The `.sprites` mixin generates identical output to the CSS template
+  but can be overridden inside of LESS
+
+This must be run when you have at least 2 sprites.
+  If run with a single sprite, then there will be reference errors.
+
+.sprites(@spritesheet-sprites);
+*/
+.sprite {
+  display: flex;
+  justify-content: space-around;
+}
+.sprite .grunt {
+  background-image: url(7c393a981ef2b0ca845b.png);
+  background-position: -462px 0px;
+  width: 400px;
+  height: 400px;
+}
+.sprite .gulp {
+  background-image: url(7c393a981ef2b0ca845b.png);
+  background-position: -862px 0px;
+  width: 232px;
+  height: 512px;
+}
+.sprite .webpack {
+  background-image: url(7c393a981ef2b0ca845b.png);
+  background-position: 0px 0px;
+  width: 462px;
+  height: 512px;
+}
+
