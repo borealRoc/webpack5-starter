@@ -255,8 +255,46 @@ module.exports = {
   plugins: [
     new UnusedWebpackPlugin({
       directories: [path.join(__dirname, "src")], // 指定需要分析的文件目录
-      root: path.join(__dirname, "../"),  // 用于指定根路径，与输出有关
+      root: path.join(__dirname, "../"), // 用于指定根路径，与输出有关
     }),
   ],
+};
+```
+
+### 2. 持久化缓存
+
+- webpack4 持久化缓存方案：cache-loader || hard-source-webpack-plugin
+
+```javascript
+// 借助 `cache-loader`：只缓存了 Loader 执行结果，缓存范围与精度不如 Webpack5 内置的缓存功能，所以性能效果相对较低
+module.exports = {
+  //...
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        use: ["cache-loader", "babel-loader", "eslint-loader"],
+      },
+    ],
+  },
+  //...
+};
+// 借助 `hard-source-webpack-plugin`: 效果几乎与 Webpack5 自带的 Cache 对齐
+const HardSourceWebpackPlugin = require("hard-source-webpack-plugin");
+module.exports = {
+  // ...
+  plugins: [new HardSourceWebpackPlugin()],
+};
+```
+
+- webpack5 持久化缓存方案：内置 cache 方案，效果优于上面两种
+
+```javascript
+module.exports = {
+  //...
+  cache: {
+    type: "filesystem",
+  },
+  //...
 };
 ```

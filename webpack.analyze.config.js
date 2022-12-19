@@ -1,8 +1,8 @@
 const es6Config = require("./webpack.es6.config");
-const tsConfig = require("./webpack.ts.config");
-const vueConfig = require("./webpack.vue.config");
-const reactConfig = require("./webpack.react.config");
-const assetConfig = require("./webpack.asset.config");
+// const tsConfig = require("./webpack.ts.config");
+// const vueConfig = require("./webpack.vue.config");
+// const reactConfig = require("./webpack.react.config");
+// const assetConfig = require("./webpack.asset.config");
 const SpeedMeasurePlugin = require("speed-measure-webpack-plugin");
 const smp = new SpeedMeasurePlugin();
 
