@@ -1,6 +1,8 @@
 const path = require("path");
 const baseConfig = require("./webpack.config");
 const { merge } = require("webpack-merge");
+// const BundleAnalyzerPlugin =
+//   require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 module.exports = merge(baseConfig, {
   entry: "./es6/index",
@@ -49,4 +51,5 @@ module.exports = merge(baseConfig, {
       },
     ],
   },
+  // plugins: [new BundleAnalyzerPlugin()],
 });

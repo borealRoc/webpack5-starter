@@ -1,6 +1,8 @@
 # webpack5-starter
 
-## 1. 使用 Babel 处理 ES6
+## 一、配置实战
+
+### 1. 使用 Babel 处理 ES6
 
 - 基本处理
 
@@ -45,20 +47,20 @@ plugins: [
 ];
 ```
 
-## 2. 处理 ts
+### 2. 处理 ts
 
 - 借助 'ts-loader' 或 '@babel/preset-typescript'
 
-## 3. vue 打包环境
+### 3. vue 打包环境
 
 - vue-loader：用于 Vue 单文件组件的 webpack 加载器
 - vue-template-compiler：将 Vue 2.0 模板预编译为渲染函数（template => ast => render）
 
-## 4. react 打包环境
+### 4. react 打包环境
 
 - @babel/preset-react: JSX 被编译为 React.createElement 函数调用
 
-## 5. NPM Library
+### 5. NPM Library
 
 ```javascript
 // webpack.config.js
@@ -97,7 +99,7 @@ module.exports = {
 }
 ```
 
-## 6. 微前端应用
+### 6. 微前端应用
 
 - webpack5 模块联邦（MF）
 
@@ -203,7 +205,7 @@ module.exports = {
     })();
     ```
 
-## 7. 图片处理与优化
+### 7. 图片处理与优化
 
 - 处理：Asset Module 模型（指定 module.rules.type），无需 loader
   - `type = "asset/resource"`: 发送一个单独的文件并导出 URL。之前通过使用  file-loader  实现
@@ -212,5 +214,49 @@ module.exports = {
   - `type = "asset"`: 在导出一个 data URI 和发送一个单独的文件之间自动选择。之前通过使用 url-loader，并且配置资源体积限制实现
 - 优化
   - 图片压缩: 借助 image-webpack-loader
-  - 雪碧图：借助  webpack-spritesmith
+  - 雪碧图：借助 webpack-spritesmith
   - 响应式图片：借助 responsive-loader
+
+## 二、性能优化
+
+### 1. 性能分析
+
+- Webpack 内置 stats 接口，专门用于统计模块构建耗时、模块依赖关系等信息
+
+```javascript
+// webpack.config.js
+module.exports = {
+  // ...
+  // 添加 profile = true 配置
+  profile: true,
+};
+```
+
+```shell
+npx webpack --json=stats.json
+```
+
+- SpeedMeasureWebpackPlugin: 统计出各个 Loader、插件的处理耗时
+
+```javascript
+// yarn add -D speed-measure-webpack-plugin
+const SpeedMeasurePlugin = require("speed-measure-webpack-plugin");
+const smp = new SpeedMeasurePlugin();
+const config = {};
+module.exports = smp.wrap(config);
+```
+
+- UnusedWebpackPlugin: 查找出工程项目里哪些文件没有被用到
+
+```javascript
+// yarn add -D unused-webpack-plugin
+const UnusedWebpackPlugin = require("unused-webpack-plugin");
+module.exports = {
+  plugins: [
+    new UnusedWebpackPlugin({
+      directories: [path.join(__dirname, "src")], // 指定需要分析的文件目录
+      root: path.join(__dirname, "../"),  // 用于指定根路径，与输出有关
+    }),
+  ],
+};
+```
