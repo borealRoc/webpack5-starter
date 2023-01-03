@@ -313,11 +313,17 @@ module.exports = {
 
 ### 3. 并行构建：多进程打包
 
-- Webpack4 之前的项目，可以使用 HappyPack 实现并行文件加载；
+- Webpack4 之前的项目，可以使用 HappyPack 实现并行文件加载
 - Webpack4 之后则建议使用 Thread-loader
-- 生产环境下还可配合 terser-webpack-plugin 的并行压缩功能，提升整体效率
 
-### 4. SplitChunks
+### 4. 压缩
+
+- HTML：html-webpack-plugin minify 选项配置 || 使用 html-minifier-terser
+- CSS：optimize-css-assets-webpack-plugin + cssnano
+- JS：Webpack4 默认使用  Uglify-js  实现代码压缩，Webpack5.0 默认使用 Terser 作为 JavaScript 代码压缩器
+- 图片：使用 image-webpack-loader
+
+### 5. SplitChunks
 
 - chunks 的概念
   - 多少个 entry 就多少个 Chunk（一个 entry 若引用了多个 module, 这些 moudle 都会被分配到该 entry 对应的 chunk 中）
@@ -337,6 +343,7 @@ module.exports = {
   - 缓存失效：将所有资源达成一个包后，所有改动 —— 即使只是修改了一个字符，客户端都需要重新下载整个代码包，缓存命中率极低
 
 - 如何分包：使用 webpack 内置的 SplitChunks（主要有两种类型的配置）
+
   - minChunks/minSize/maxInitialRequest 等分包条件，满足这些条件的模块都会被执行分包
   - cacheGroup ：用于为特定资源声明特定分包条件，例如可以为 node_modules 包设定更宽松的分包条件
 
@@ -345,11 +352,13 @@ module.exports = {
   - 针对业务代码，通过 minChunks 配置项将频繁使用的资源合并为 common 资源，单独打包
   - 首屏用不上的代码，尽量以异步方式引入
 
-### 其它
+### 6. Tree-Shaking
 
-- 约束 Loader 执行范围：include/exclude
-- 设置 resolve 缩小搜索范围: extension, modules
-- 开发模式禁用产物优化：Webpack 提供了许多产物优化功能，例如：Tree-Shaking、SplitChunks、Minimizer 等，这些能力能够有效减少最终产物的尺寸，提升生产环境下的运行性能，但这些优化在开发环境中意义不大，反而会增加构建器的负担(都是性能大户)
-  - optimization.minimize 保持默认值或 false，关闭代码压缩
-  - optimization.splitChunks 保持默认值或 false，关闭代码分包
-  - optimization.usedExports 保持默认值或 false，关闭 Tree-shaking 功能
+``` javascript
+module.exports = {
+  mode: "production",
+  optimization: {
+    usedExports: true,
+  },
+};
+```

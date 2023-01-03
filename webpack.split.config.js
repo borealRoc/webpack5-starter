@@ -61,33 +61,3 @@ module.exports = merge(baseConfig, {
     },
   },
 });
-
-// 一、chunks：Webpack 会首先为 Entry 模块、异步模块、Runtime 模块(取决于配置) 创建 Chunk 容器，之后按照 splitChunks 配置进一步优化、裁剪分包内容
-// 1. 多少个 entry 就多少个 Chunk（一个 entry 若引用了多个 module, 这些 moudle 都会被分配到该 entry 对应的 chunk 中）
-// 2. 异步模块(通过 import('./xx') 等语句导入的异步模块)则创建新的 Chunk 对象:
-// import(/* webpackChunkName: "asyncB" */ "./b").then((asyncB) => {
-//     console.log(asyncB);
-//   });
-// 3. 根据 Runtime 模块(取决于配置) 创建 Chunk 容器
-// 4. 根据 splitChunks 设定创建若干 Chunk 对象
-
-
-// 二、webpack 默认的分包模式
-// 1. Initial Chunk：entry 模块及相应子模块打包成 Initial Chunk
-// 2. Async Chunk：通过 import('./xx') 等语句导入的异步模块及相应子模块组成的 Async Chunk
-// 3. Runtime Chunk：运行时代码抽离成 Runtime Chunk，可通过 entry.runtime 配置项实现
-
-// 三、分包的必要性
-// 1. 模块重复打包：假如多个 Chunk 同时依赖同一个 Module，那么这个 Module 会被不受限制地重复打包进这些 Chunk
-// 2. 资源冗余：客户端必须等待整个应用的代码包都加载完毕才能启动运行，但可能用户当下访问的内容只需要使用其中一部分代码
-// 3. 缓存失效：将所有资源达成一个包后，所有改动 —— 即使只是修改了一个字符，客户端都需要重新下载整个代码包，缓存命中率极低
-
-// 四、如何分包：使用webpack内置的SplitChunks
-// 1. splitChunks 主要有两种类型的配置
-// 1.1 minChunks/minSize/maxInitialRequest 等分包条件，满足这些条件的模块都会被执行分包
-// 1.2 cacheGroup ：用于为特定资源声明特定分包条件，例如可以为 node_modules 包设定更宽松的分包条件
-
-// 五、最佳分包策略
-// 1. 将 node_modules 模块打包成单独文件(通过 cacheGroups 实现)
-// 2. 针对业务代码，通过 minChunks 配置项将频繁使用的资源合并为 common 资源，单独打包
-// 3. 首屏用不上的代码，尽量以异步方式引入
