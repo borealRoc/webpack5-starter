@@ -4,14 +4,14 @@
   "description": "Webpack5 核心原理与应用实践",
   "main": "index.js",
   "scripts": {
-    "split": "webpack --config webpack.split.config",
     "es6": "webpack --config webpack.es6.config",
     "ts": "webpack --config webpack.ts.config",
     "vue": "webpack --config webpack.vue.config",
     "react": "webpack --config webpack.react.config",
     "asset": "webpack --config webpack.asset.config",
     "es6Stats": "webpack --config webpack.asset.config --json=stats.json",
-    "analyze": "webpack --config webpack.analyze.config"
+    "analyze": "webpack --config webpack.analyze.config",
+    "split": "webpack --config webpack.split.config"
   },
   "repository": {
     "type": "git",

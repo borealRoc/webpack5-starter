@@ -266,7 +266,9 @@ module.exports = {
 - webpack4 持久化缓存方案：cache-loader || hard-source-webpack-plugin
 
 ```javascript
-// 借助 `cache-loader`：只缓存了 Loader 执行结果，缓存范围与精度不如 Webpack5 内置的缓存功能，所以性能效果相对较低
+// 借助 `cache-loader`
+// 1. 将 Loader 处理结果保存到硬盘，下次运行时若文件内容没有发生变化则直接返回缓存结果
+// 2. 只缓存了 Loader 执行结果，缓存范围与精度不如 Webpack5 内置的缓存功能，所以性能效果相对较低（性能提升在 60% ~ 80% 之间）
 module.exports = {
   //...
   module: {
@@ -279,7 +281,9 @@ module.exports = {
   },
   //...
 };
-// 借助 `hard-source-webpack-plugin`: 效果几乎与 Webpack5 自带的 Cache 对齐
+// 借助 `hard-source-webpack-plugin`
+// 1. 不仅仅缓存了 Loader 运行结果，还保存了 Webpack 构建过程中许多中间数据
+// 2. 底层逻辑与 Webpack5 的持久化缓存很相似，但优化效果稍微差一些（性能提升在 62% ~ 88% 之间）
 const HardSourceWebpackPlugin = require("hard-source-webpack-plugin");
 module.exports = {
   // ...
@@ -288,13 +292,64 @@ module.exports = {
 ```
 
 - webpack5 持久化缓存方案：内置 cache 方案，效果优于上面两种
+  - webpack5 将首次构建出的 Module、Chunk、ModuleGraph 等对象序列化后保存到硬盘中
+  - 在下次编译时对比每一个文件的内容哈希或时间戳，未发生变化的文件跳过编译操作，直接使用缓存副本，减少重复计算
 
 ```javascript
 module.exports = {
-  //...
   cache: {
-    type: "filesystem",
+    type: "filesystem", // 缓存类型，支持 'memory' | 'filesystem'，需要设置为 filesystem 才能开启持久缓存
+    cacheDirectory: '', // 缓存文件路径，默认为 node_modules/.cache/webpack
+    buildDependencies: { // 额外的依赖文件，当这些文件内容发生变化时，缓存会完全失效而执行完整的编译构建，通常可设置为各种配置文件
+      config: [
+        path.join(__dirname, 'webpack.dll_config.js'),
+        path.join(__dirname, '.babelrc')
+      ],
+    }
+    maxAge: '', // 缓存失效时间，默认值为 5184000000
   },
-  //...
 };
 ```
+
+### 3. 并行构建：多进程打包
+
+- Webpack4 之前的项目，可以使用 HappyPack 实现并行文件加载；
+- Webpack4 之后则建议使用 Thread-loader
+- 生产环境下还可配合 terser-webpack-plugin 的并行压缩功能，提升整体效率
+
+### 4. SplitChunks
+
+- chunks 的概念
+  - 多少个 entry 就多少个 Chunk（一个 entry 若引用了多个 module, 这些 moudle 都会被分配到该 entry 对应的 chunk 中）
+  - 异步模块(通过 import('./xx') 等语句导入的异步模块)则创建新的 Chunk 对象
+  - 根据 Runtime 模块(通过 entry.runtime 配置) 创建 Chunk 容器
+  - 根据 splitChunks 设定创建若干 Chunk 对象
+- webpack 默认的分包模式
+
+  - Initial Chunk：entry 模块及相应子模块打包成 Initial Chunk
+  - Async Chunk：通过 import('./xx') 等语句导入的异步模块及相应子模块组成的 Async Chunk
+  - Runtime Chunk：运行时代码抽离成 Runtime Chunk，可通过 entry.runtime 配置项实现
+
+- 分包的必要性
+
+  - 模块重复打包：假如多个 Chunk 同时依赖同一个 Module，那么这个 Module 会被不受限制地重复打包进这些 Chunk
+  - 资源冗余：客户端必须等待整个应用的代码包都加载完毕才能启动运行，但可能用户当下访问的内容只需要使用其中一部分代码
+  - 缓存失效：将所有资源达成一个包后，所有改动 —— 即使只是修改了一个字符，客户端都需要重新下载整个代码包，缓存命中率极低
+
+- 如何分包：使用 webpack 内置的 SplitChunks（主要有两种类型的配置）
+  - minChunks/minSize/maxInitialRequest 等分包条件，满足这些条件的模块都会被执行分包
+  - cacheGroup ：用于为特定资源声明特定分包条件，例如可以为 node_modules 包设定更宽松的分包条件
+
+- 最佳分包策略
+  - 将 node_modules 模块打包成单独文件(通过 cacheGroups 实现)
+  - 针对业务代码，通过 minChunks 配置项将频繁使用的资源合并为 common 资源，单独打包
+  - 首屏用不上的代码，尽量以异步方式引入
+
+### 其它
+
+- 约束 Loader 执行范围：include/exclude
+- 设置 resolve 缩小搜索范围: extension, modules
+- 开发模式禁用产物优化：Webpack 提供了许多产物优化功能，例如：Tree-Shaking、SplitChunks、Minimizer 等，这些能力能够有效减少最终产物的尺寸，提升生产环境下的运行性能，但这些优化在开发环境中意义不大，反而会增加构建器的负担(都是性能大户)
+  - optimization.minimize 保持默认值或 false，关闭代码压缩
+  - optimization.splitChunks 保持默认值或 false，关闭代码分包
+  - optimization.usedExports 保持默认值或 false，关闭 Tree-shaking 功能
