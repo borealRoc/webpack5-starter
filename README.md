@@ -354,7 +354,7 @@ module.exports = {
 
 ### 6. Tree-Shaking
 
-``` javascript
+```javascript
 module.exports = {
   mode: "production",
   optimization: {
@@ -362,3 +362,18 @@ module.exports = {
   },
 };
 ```
+
+## 三、原理
+
+### 1. 自定义 loader
+
+- 在 webpack 配置文件中定义“自定义 loader”的查找路径：`resolveLoader: {modules: ['node_modules', './custom-loader/']}`
+- loader 本质是一个函数: `module.exports = function (source) {};`
+- `source` 参数获取入口文件源码
+- `this.getOptions()` 获取传给 loader 的参数
+- 借助 `schema-utils` 可以校验传给 loader 的参数
+- 返回结果：`return result`
+- 返回多个结果：`this.callback(null, result)`
+- 处理 loader 里的异步事件： `this.async()`
+
+### 2. plugin
