@@ -314,7 +314,36 @@ module.exports = {
 ### 3. 并行构建：多进程打包
 
 - Webpack4 之前的项目，可以使用 HappyPack 实现并行文件加载
+
+```javascript
+// yarn add -D happypack
+rules: [
+  {
+    test: /\.js$/,
+    // 1. 使用 happypack/loader 代替原本的 Loader 序列
+    use: 'happypack/loader?id=js',
+  }
+],
+// 2. 使用 HappyPack 插件注入代理执行 Loader 序列的逻辑
+plugins: [
+  new HappyPack({
+    id: 'js',
+    loaders: ['babel-loader']
+  })
+]
+```
+
 - Webpack4 之后则建议使用 Thread-loader
+
+```javascript
+// yarn add -D thread-loader
+rules: [
+  {
+    test: /\.js$/,
+    use: ["thread-loader", "babel-loader"],
+  }
+],
+```
 
 ### 4. 压缩
 
@@ -352,7 +381,26 @@ module.exports = {
   - 针对业务代码，通过 minChunks 配置项将频繁使用的资源合并为 common 资源，单独打包
   - 首屏用不上的代码，尽量以异步方式引入
 
+```javascript
+optimization: {
+  chunks: 'all', // 'all' | 'async' | 'initial'
+  minChunks: 2,  //  Module 被使用频率, 它并不直接等价于被 import 的次数，而是取决于上游调用者是否被视作 Initial Chunk 或 Async Chunk 处理
+  maxInitialRequests: 5, // Initial Chunk 最大并行请求数
+  axAsyncRequests: 3,  // Async Chunk 最大并行请求数
+  cacheGroups: {
+    // 将 node_modules 模块打包成单独文件
+    vendors: {
+      test: /[\\/]node_modules[\\/]/,
+      minChunks: 1,
+    },
+  }
+}
+```
+
 ### 6. Tree-Shaking
+
+- CSS 摇树：purgecss-webpack-plugin
+- JS 摇树：设置 `optimization: {useExports: true} `
 
 ```javascript
 module.exports = {
