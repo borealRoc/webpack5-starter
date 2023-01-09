@@ -12,7 +12,8 @@
     "es6Stats": "webpack --config webpack.asset.config --json=stats.json",
     "analyze": "webpack --config webpack.analyze.config",
     "split": "webpack --config webpack.split.config",
-    "cl": "webpack --config webpack.cl.config"
+    "cl": "webpack --config webpack.cl.config",
+    "mpa": "webpack --config webpack.mpa.config"
   },
   "repository": {
     "type": "git",
@@ -40,6 +41,7 @@
     "cache-loader": "^4.1.0",
     "clean-webpack-plugin": "^4.0.0",
     "css-loader": "^6.7.2",
+    "glob": "7.2.0",
     "hard-source-webpack-plugin": "^0.13.1",
     "html-webpack-plugin": "^5.5.0",
     "image-webpack-loader": "^8.1.0",
