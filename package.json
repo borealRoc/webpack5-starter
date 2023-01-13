@@ -13,6 +13,7 @@
     "analyze": "webpack --config webpack.analyze.config",
     "split": "webpack --config webpack.split.config",
     "cl": "webpack --config webpack.cl.config",
+    "cp": "webpack --config webpack.cp.config",
     "mpa": "webpack --config webpack.mpa.config"
   },
   "repository": {
