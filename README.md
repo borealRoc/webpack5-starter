@@ -415,18 +415,34 @@ module.exports = {
 
 ### 1. 自定义 loader
 
-- 在 webpack 配置文件中定义“自定义 loader”的查找路径：`resolveLoader: {modules: ['node_modules', './custom-loader/']}`
-- loader 本质是一个函数: `module.exports = function (source) {};`
-- `source` 参数获取入口文件源码
-- `this.getOptions()` 获取传给 loader 的参数
-- 借助 `schema-utils` 可以校验传给 loader 的参数
-- 返回结果：`return result`
-- 返回多个结果：`this.callback(null, result)`
-- 处理 loader 里的异步事件： `this.async()`
+#### 1.1 原理
+
+- 在 Webpack 进入构建阶段后，首先会通过 IO 接口读取文件内容
+- 之后调用 `LoaderRunner` 并将文件内容以 `source` 参数形式传递到 Loader 数组
+- source 数据在 Loader 数组内可能会经过若干次形态转换，最终以标准 JavaScript 代码提交给 Webpack 主流程，以此实现内容编译功能
+
+#### 1.2 开发技巧
+
+- 基本方法
+  - 在 webpack 配置文件中定义“自定义 loader”的查找路径：`resolveLoader: {modules: ['node_modules', './custom-loader/']}`
+  - Loader 通常是一种 mapping 函数形式，接收原始代码内容，返回编译结果：`module.exports = function (source) {return modifySource;}`
+  - Loader 运行过程还可以通过一些上下文接口，有限制地影响 Webpack 编译过程，上下文接口将在运行 Loader 时以 this 方式注入到 Loader 函数
+    - 获取传给 loader 的参数：`this.getOptions()`
+    - 返回多个结果：`this.callback(null, result)`
+    - 处理 loader 里的异步事件： `this.async(null, result)`
+    - 取消 Loader 缓存：`this.cacheable(false)`
+    - 在 Loader 中直接写出文件（例如 file-loader 依赖该接口写出 Chunk 之外的产物）：`this.emitFile()`
+    - 添加额外的文件依赖，当这些依赖发生变化时，也会触发重新构建：`this.addDependency()`
+- 校验 loader 参数：借助 `schema-utils`
+- 日志处理 -- 使用 Loader Context 的 getLogger 接口：`const logger = this.getLogger("xxx-loader"); logger.info("information")`
+- 上报异常
+  - 一般应尽量使用 logger.error `logger.error`，仅输出错误日志，不会打断编译流程
+  - 对于需要明确警示用户的错误，优先使用 `this.emitError` 接口，同样不会打断编译流程
+  - 对于已经严重到不能继续往下编译的错误，使用 `this.callback` 接口提交错误信息，，效果与直接使用 throw 相同，会打断编译流程：`this.callback(new Error("发生了一些异常"))`
 
 ### 2. 自定义 plugin
 
-#### 2.1 plugin 原理
+#### 2.1 原理
 
 - webpack 插件是一个带有 `apply` 函数的类，`constructor(ops)` 中的 opts 参数可以获取传给插件的参数
 - Webpack 在启动时会调用插件对象的 apply 函数，并以参数方式传递核心对象 `compiler`
@@ -454,9 +470,7 @@ module.exports = {
 // 1. Hook 调用时机
 // 2. Hook 回调传递的上下文参数
 class MyWebpackPlugin {
-  constructor(opts) {
-    this.name = opts.name; // 插件名称
-  }
+  constructor(opts) {}
   apply(compiler) {
     compiler.hooks.emit.tapAsync(this.name, (compilation, cb) => {});
   }
