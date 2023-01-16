@@ -354,16 +354,50 @@ rules: [
 
 ### 5. SplitChunks
 
-- chunks 的概念
-  - 多少个 entry 就多少个 Chunk（一个 entry 若引用了多个 module, 这些 moudle 都会被分配到该 entry 对应的 chunk 中）
-  - 异步模块(通过 import('./xx') 等语句导入的异步模块)则创建新的 Chunk 对象
-  - 根据 Runtime 模块(通过 entry.runtime 配置) 创建 Chunk 容器
-  - 根据 splitChunks 设定创建若干 Chunk 对象
-- webpack 默认的分包模式
+- Chunk vs ChunkGroup vs ChunkGraph
 
-  - Initial Chunk：entry 模块及相应子模块打包成 Initial Chunk
+  - Chunk：根据模块依赖关系合并多个 Module，输出成资产文件
+  - ChunkGroup：一个 ChunkGroup 内包含一个或多个 Chunk 对象
+  - ChunkGraph：Chunk 之间 以及 ChunkGroup 之间的依赖关系汇聚而成的关系图
+
+```javascript
+entry: {
+  A: { import: "./src/a", runtime: "solid-runtime" },
+  B: { import: "./src/b", runtime: "solid-runtime" }，
+}
+// a.js
+import c from './c'
+// c.js
+import('./e.js')
+// e.js
+import f from './f'
+// b.js
+import d from './d'
+
+// 1. Chunk
+// 1.1 Entry Chunk:
+// Chunk A: module_a, module_c
+// Chunk B: module_b, module_d
+// 1.2 Async Chunk
+// Async Chunk E：module_e, module_f
+// 1.3 Runtime Chunk
+// solid-runtime: 
+
+// ChunkGroup
+// ChunkGroup_1: Chunk A,  Chunk B
+// ChunkGroup_2: Async Chunk E
+
+// ChunkGraph
+// 
+```
+
+- webpack 的分包机制
+
+  - Initial/Entry Chunk：entry 模块及相应子模块打包成 Initial Chunk
+    - 多少个 entry 就多少个 Chunk, 一个 entry 若引用了多个 module, 这些 moudle 都会被分配到该 entry 对应的 chunk 中
   - Async Chunk：通过 import('./xx') 等语句导入的异步模块及相应子模块组成的 Async Chunk
-  - Runtime Chunk：运行时代码抽离成 Runtime Chunk，可通过 entry.runtime 配置项实现
+  - Runtime Chunk：entry.runtime 不为空时，会将运行时模块单独组织成一个 Chunk
+  - 根据 splitChunks 设定创建若干 Chunk 对象
 
 - 分包的必要性
 
@@ -426,17 +460,17 @@ module.exports = {
 - 基本方法
   - 在 webpack 配置文件中定义“自定义 loader”的查找路径：`resolveLoader: {modules: ['node_modules', './custom-loader/']}`
   - Loader 通常是一种 mapping 函数形式，接收原始代码内容，返回编译结果：`module.exports = function (source) {return modifySource;}`
-  - Loader 运行过程还可以通过一些上下文接口，有限制地影响 Webpack 编译过程，上下文接口将在运行 Loader 时以 this 方式注入到 Loader 函数
+  - Loader 运行过程可以通过上下文接口，有限制地影响 Webpack 编译过程，上下文接口将在运行 Loader 时以 this 方式注入到 Loader 函数
     - 获取传给 loader 的参数：`this.getOptions()`
     - 返回多个结果：`this.callback(null, result)`
     - 处理 loader 里的异步事件： `this.async(null, result)`
     - 取消 Loader 缓存：`this.cacheable(false)`
     - 在 Loader 中直接写出文件（例如 file-loader 依赖该接口写出 Chunk 之外的产物）：`this.emitFile()`
-    - 添加额外的文件依赖，当这些依赖发生变化时，也会触发重新构建：`this.addDependency()`
+    - 添加额外的文件依赖，当这些依赖发生变化时，会触发重新构建：`this.addDependency()`
 - 校验 loader 参数：借助 `schema-utils`
 - 日志处理 -- 使用 Loader Context 的 getLogger 接口：`const logger = this.getLogger("xxx-loader"); logger.info("information")`
 - 上报异常
-  - 一般应尽量使用 logger.error `logger.error`，仅输出错误日志，不会打断编译流程
+  - 一般使用 `logger.error`，仅输出错误日志，不会打断编译流程
   - 对于需要明确警示用户的错误，优先使用 `this.emitError` 接口，同样不会打断编译流程
   - 对于已经严重到不能继续往下编译的错误，使用 `this.callback` 接口提交错误信息，，效果与直接使用 throw 相同，会打断编译流程：`this.callback(new Error("发生了一些异常"))`
 
