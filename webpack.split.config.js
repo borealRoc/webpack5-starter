@@ -4,8 +4,8 @@ const { merge } = require("webpack-merge");
 
 module.exports = merge(baseConfig, {
   entry: {
-    entry1: "./spilit-chunks/entry1",
-    entry2: "./spilit-chunks/entry2",
+    entry1: { import: "./spilit-chunks/entry1", runtime: "solid-runtime" },
+    entry2: { import: "./spilit-chunks/entry2", runtime: "solid-runtime" },
   },
   output: {
     path: path.resolve(__dirname, "./spilit-chunks/build"),
@@ -41,29 +41,30 @@ module.exports = merge(baseConfig, {
       /**
        * 分包的第二种策略：设置缓存组
        */
+      cacheGroups: {
+        lodash: {
+          test: /lodash/,
+          name: "lodash",
+          minChunks: 1,
+        },
+        // react: {
+        //   test: /react|react-dom/,
+        //   name: "react",
+        //   minChunks: 1,
+        // },
+        // vue: {
+        //   test: /vue/,
+        //   name: "vue",
+        //   minChunks: 1,
+        // },
+      },
       // cacheGroups: {
-      //   lodash: {
-      //     test: /lodash/,
-      //     name: "lodash",
-      //     minChunks: 1,
-      //   },
-      //   react: {
-      //     test: /react|react-dom/,
-      //     name: "react",
-      //     minChunks: 1,
-      //   },
-      //   vue: {
-      //     test: /vue/,
-      //     name: "vue",
+      //   vendors: {
+      //     test: /[\\/]node_modules[\\/]/,
       //     minChunks: 1,
       //   },
       // },
-      cacheGroups: {
-        vendors: {
-          test: /[\\/]node_modules[\\/]/,
-          minChunks: 1,
-        },
-      },
     },
   },
+  profile: true,
 });

@@ -11,7 +11,7 @@
     "asset": "webpack --config webpack.asset.config",
     "es6Stats": "webpack --config webpack.asset.config --json=stats.json",
     "analyze": "webpack --config webpack.analyze.config",
-    "split": "webpack --config webpack.split.config",
+    "split": "webpack --config webpack.split.config --json=stats.json",
     "cl": "webpack --config webpack.cl.config",
     "cp": "webpack --config webpack.cp.config",
     "mpa": "webpack --config webpack.mpa.config"

@@ -354,43 +354,6 @@ rules: [
 
 ### 5. SplitChunks
 
-- Chunk vs ChunkGroup vs ChunkGraph
-
-  - Chunk：根据模块依赖关系合并多个 Module，输出成资产文件
-  - ChunkGroup：一个 ChunkGroup 内包含一个或多个 Chunk 对象
-  - ChunkGraph：Chunk 之间 以及 ChunkGroup 之间的依赖关系汇聚而成的关系图
-
-```javascript
-entry: {
-  A: { import: "./src/a", runtime: "solid-runtime" },
-  B: { import: "./src/b", runtime: "solid-runtime" }，
-}
-// a.js
-import c from './c'
-// c.js
-import('./e.js')
-// e.js
-import f from './f'
-// b.js
-import d from './d'
-
-// 1. Chunk
-// 1.1 Entry Chunk:
-// Chunk A: module_a, module_c
-// Chunk B: module_b, module_d
-// 1.2 Async Chunk
-// Async Chunk E：module_e, module_f
-// 1.3 Runtime Chunk
-// solid-runtime: 
-
-// ChunkGroup
-// ChunkGroup_1: Chunk A,  Chunk B
-// ChunkGroup_2: Async Chunk E
-
-// ChunkGraph
-// 
-```
-
 - webpack 的分包机制
 
   - Initial/Entry Chunk：entry 模块及相应子模块打包成 Initial Chunk
@@ -398,6 +361,41 @@ import d from './d'
   - Async Chunk：通过 import('./xx') 等语句导入的异步模块及相应子模块组成的 Async Chunk
   - Runtime Chunk：entry.runtime 不为空时，会将运行时模块单独组织成一个 Chunk
   - 根据 splitChunks 设定创建若干 Chunk 对象
+
+```javascript
+entry: {
+  entry1: { import: "./entry1", runtime: "solid-runtime" },
+  entry2: { import: ".//entry2", runtime: "solid-runtime" },
+},
+splitChunks: {
+  cacheGroups: {
+    lodash: {
+      test: /lodash/,
+      name: "lodash",
+      minChunks: 1,
+    },
+  }
+}
+
+
+// entry1.js
+import common from "./common";
+import("./async-module");
+import lodash from 'lodash'
+// entry2.js
+import common from './common'
+
+// 1. Initial Chunk
+{chunk[entry1]：module[entry1.js], module[common.js]}
+{chunk[entry2]：module[entry2.js], module[common.js]}
+{chunk[lodash]: module[node_modules/lodash/lodash.js]}
+
+// 2. Async Chunk
+{chunk[async-module]: module[async-module.js]}
+
+// 3. Runtime Chunk
+{chunk[solid-runtime]: ……}
+```
 
 - 分包的必要性
 
@@ -521,3 +519,5 @@ class MyWebpackPlugin {
   - 使用 `ProgressPlugin` 插件（Webpack 内置用于展示构建进度的插件）的 `reportProgress` 接口上报执行进度
   - 使用 `stats` 接口汇总插件运行的统计数据
 - 校验配置参数：借助 `schema-utils`
+
+### 3. 打包过程
