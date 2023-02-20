@@ -521,3 +521,23 @@ class MyWebpackPlugin {
 - 校验配置参数：借助 `schema-utils`
 
 ### 3. 打包过程
+
+#### 3.1 初始化阶段：Compiler, Complilation
+
+- 参数：根据用户配置、命令行参数和 webpack 底层默认配置，合并出完整的参数；
+- Compiler：用上面构建出的参数，创建 Compiler 对象（全局构建管理器）
+- Plugins：遍历 plugins 数组，执行插件的 apply 方法；根据 webpack 配置动态注入其它插件（比如根据 mode 值注入一些对 development 或 production 模式友好的插件）
+- Complilation：执行 compiler.run(), 生成 Complilation 对象（单次构建管理器）Depen
+- Dependence：确定入口，根据 entry 配置，执行 compilation.addEntry()， 将入口模块转换成 Dependence 对象。
+
+#### 3.2 构建阶段：ModuleGraph
+
+- 调用相关 loader，将入口文件的内容转换成标准的 JS；
+- 再调用 JS 解析器 Acorn，将 JS 转换成 AST，并从 AST 中获取该模块的依赖；
+- 遍历依赖，重复上面两个步骤的处理，获取所有模块的标准 JS 内容和依赖，最终生成 ModuleGraph 对象。
+
+#### 3.3 生成阶段：Chunk, ChunkGraph, Asset
+
+- Chunk, ChunkGraph：遍历 ModuleGraph 对象，根据模块之间的关系，将模块封装进若干 Chunk 中，并根据 Chunk 之间的关系创建 ChunkGraph 对象；
+- 优化：对每一个 Chunk 执行一些优化操作，比如 tree-shaking，splitChunks，压缩等；
+- Asset：将最终处理好的内容，封装成 Asset，写入 output 配置的出口文件中。
